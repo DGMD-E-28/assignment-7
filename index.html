@@ -133,10 +133,10 @@ const Keyboard = ({ keyStatuses }) => {
 const App = () => {
     const keyStatuses = getKeyStatuses(guesses, answer);
     return (
-        <>
+        <div className="game-container">
             <Board />
             <Keyboard keyStatuses={keyStatuses} />
-        </>
+        </div>
     );
 };
 
