@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<!--suppress HtmlRequiredLangAttribute -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles/styles.css">
+    <title>Wordle Redux - DGMD E-28 Assignment 6</title>
+    <link rel="icon" href="./assets/favicon/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<header>
+    <div class="nav-bar">
+
+        <a href="index.html">
+            <img src="assets/default.png" alt="Wordle" class="logo">
+        </a>
+        <!-- Theme Switch Container -->
+        <div class="theme-container">
+            <span id="theme-icon">🌞</span>
+            <div class="theme-switch">
+                <label for="theme-toggle"></label><input type="range" id="theme-toggle" min="0" max="2" step="1" value="0">
+            </div>
+        </div>
+    </div>
+</header>
+<div id="myapp"></div>
+<script type="text/babel">
+const answer = "moody";
+const guesses = ["might", "flood", "stray"];
+
+function getResult(guess, answer) {
+    const result = [];
+    const answerArr = answer.split("");
+    const guessArr = guess.split("");
+
+    for (let i = 0; i < 5; i++) {
+        if (guessArr[i] === answerArr[i]) {
+            result[i] = "correct";
+            answerArr[i] = null;
+        }
+    }
+
+    for (let i = 0; i < 5; i++) {
+        if (!result[i]) {
+            const idx = answerArr.indexOf(guessArr[i]);
+            result[i] = idx !== -1 ? "present" : "absent";
+            if (idx !== -1) answerArr[idx] = null;
+        }
+    }
+
+    return result;
+}
+
+function getKeyStatuses(guesses, answer) {
+    const statusMap = {};
+    for (const word of guesses) {
+        const result = getResult(word, answer);
+        for (let i = 0; i < word.length; i++) {
+            const letter = word[i].toUpperCase();
+            const status = result[i];
+            const current = statusMap[letter];
+            if (current === "correct") continue;
+            if (current === "present" && status === "absent") continue;
+            statusMap[letter] = status;
+        }
+    }
+    return statusMap;
+}
+
+const Tile = ({ letter, status }) => (
+    <div className={`tile ${status}`}>{letter}</div>
+);
+
+const Row = ({ word }) => {
+    const result = getResult(word, answer);
+    return (
+        <div className="row">
+            {word.split("").map((letter, i) => (
+                <Tile key={i} letter={letter} status={result[i]} />
+            ))}
+        </div>
+    );
+};
+
+const Board = () => {
+    const rows = [];
+    for (let i = 0; i < 6; i++) {
+        if (i < guesses.length) {
+            rows.push(<Row key={i} word={guesses[i]} />);
+        } else {
+            rows.push(
+                <div key={i} className="row">
+                    {Array(5).fill("").map((_, j) => (
+                        <Tile key={j} letter="" status="" />
+                    ))}
+                </div>
+            );
+        }
+    }
+    return <div>{rows}</div>;
+};
+
+const Keyboard = ({ keyStatuses }) => {
+    const layout = [
+        "QWERTYUIOP".split(""),
+        "ASDFGHJKL".split(""),
+        "ZXCVBNM".split("")
+    ];
+
+    return (
+        <div>
+            {layout.map((row, i) => (
+                <div key={i} className="keyboard-row">
+                    {row.map((key, j) => {
+                        const status = keyStatuses[key];
+                        const keyClass = status ? `key ${status}` : "key";
+                        return (
+                            <div key={j} className={keyClass}>{key}</div>
+                        );
+                    })}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const App = () => {
+    const keyStatuses = getKeyStatuses(guesses, answer);
+    return (
+        <>
+            <Board />
+            <Keyboard keyStatuses={keyStatuses} />
+        </>
+    );
+};
+
+ReactDOM.render(<App />, document.getElementById("myapp"));
+</script>
+<script>
+    const toggle = document.getElementById("theme-toggle");
+    const icon = document.getElementById("theme-icon");
+
+    toggle.addEventListener("input", () => {
+        const value = parseInt(toggle.value);
+
+        document.body.classList.remove("dark-mode", "harvard-mode");
+
+        if (value === 0) {
+            icon.textContent = "🌞"; // Light mode
+        } else if (value === 1) {
+            document.body.classList.add("dark-mode");
+            icon.textContent = "🌙"; // Dark mode
+        } else if (value === 2) {
+            document.body.classList.add("harvard-mode");
+            icon.innerHTML = `<img src="./assets/harvard.png" alt="Harvard" class="harvard-icon">`;
+        }
+    });
+</script>
+</body>
+</html>
