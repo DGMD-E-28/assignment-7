@@ -109,7 +109,7 @@ const Keyboard = ({ keyStatuses }) => {
     const layout = [
         "QWERTYUIOP".split(""),
         "ASDFGHJKL".split(""),
-        "ZXCVBNM".split("")
+        ["ENTER", ..."ZXCVBNM".split(""), "⌫"]
     ];
 
     return (
@@ -118,9 +118,10 @@ const Keyboard = ({ keyStatuses }) => {
                 <div key={i} className="keyboard-row">
                     {row.map((key, j) => {
                         const status = keyStatuses[key];
-                        const keyClass = status ? `key ${status}` : "key";
+                        const keyClass = `key ${status || ""}`.trim();
+                        const display = key === "⌫" ? "⌫" : key;
                         return (
-                            <div key={j} className={keyClass}>{key}</div>
+                            <div key={j} className={keyClass}>{display}</div>
                         );
                     })}
                 </div>
